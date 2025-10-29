@@ -35,7 +35,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(api_router, prefix=f"/api/{config.API_V1_STR}")
+app.include_router(api_router, prefix=f"/api")
 
 @app.get("/health", summary="健康检查", tags=["system"])
 def health():
@@ -53,7 +53,11 @@ def health():
 app.mount("/assets", StaticFiles(directory="frontend/dist/assets"), name="assets")
 @app.get("/{full_path:path}")
 async def serve_frontend(full_path: str):
-    index_path = os.path.join("frontend", "dist", "index.html")
+    if full_path is None or full_path == "":
+        full_path = "index.html"
+    index_path = os.path.join("frontend", "dist", full_path)
+    if not os.path.isfile(index_path):
+        index_path = os.path.join("frontend", "dist", "index.html")
     return FileResponse(index_path)
 
 
