@@ -1,4 +1,4 @@
-.PHONY: help install dev build start clean test lint format docker-build docker-run docker-stop backend-dev frontend-dev
+.PHONY: help init install dev build start clean test lint format docker-build docker-run docker-stop backend-dev frontend-dev
 
 # Variables
 PYTHON := python3
@@ -17,6 +17,10 @@ NC := \033[0m # No Color
 help: ## Show this help message
 	@echo "$(BLUE)Available commands:$(NC)"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-18s$(NC) %s\n", $$1, $$2}'
+
+# Initialization command
+init: ## Initialize project with custom name and settings
+	@bash scripts/init-project.sh
 
 # Installation commands
 install: ## Install all dependencies (backend + frontend)
