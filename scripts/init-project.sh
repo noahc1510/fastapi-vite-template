@@ -89,7 +89,10 @@ replace_in_file "Makefile" "DOCKER_CONTAINER := fastapi-vite-container" "DOCKER_
 replace_in_file "app/api.py" "title=\"FastAPI Vite Template API\"" "title=\"$PROJECT_NAME_TITLE API\""
 replace_in_file "app/api.py" "description=\"基础 FastAPI 服务，内置 CORS 与 Swagger 文档\"" "description=\"$PROJECT_DESC\""
 
-# 5. Update README.md (create if not exists)
+# 5. Update frontend/index.html
+replace_in_file "frontend/index.html" "<title>vite-project</title>" "<title>$PROJECT_NAME_TITLE</title>"
+
+# 6. Update README.md (create if not exists)
 if [ ! -f "README.md" ] || [ ! -s "README.md" ]; then
     cat > README.md << EOF
 # $PROJECT_NAME_TITLE
