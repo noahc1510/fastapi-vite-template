@@ -5,8 +5,8 @@ PYTHON := python3
 UV := uv
 VENV := .venv
 FRONTEND_DIR := frontend
-DOCKER_IMAGE := fastapi-vite-app
-DOCKER_CONTAINER := fastapi-vite-container
+DOCKER_IMAGE := laplacelab-remote-access
+DOCKER_CONTAINER := laplacelab-remote-access-container
 
 # Colors for output
 BLUE := \033[0;34m

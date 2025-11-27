@@ -18,9 +18,9 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="FastAPI Vite Template API",
+    title="Laplacelab Remote Access API",
     version="0.1.0",
-    description="基础 FastAPI 服务，内置 CORS 与 Swagger 文档",
+    description="A FastAPI + Vite project",
     docs_url="/docs",        # Swagger UI
     redoc_url="/redoc",      # ReDoc 文档
     openapi_url="/openapi.json",

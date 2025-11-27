@@ -1,5 +1,5 @@
 {
-  "name": "vite-project",
+  "name": "laplacelab-remote-access-frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,11 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@logto/browser": "^2.0.0",
+    "@logto/react": "^2.0.0",
     "@radix-ui/react-slot": "^1.2.3",
     "@tailwindcss/vite": "^4.1.16",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.548.0",
+    "react-router-dom": "^6.28.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "tailwind-merge": "^3.3.1",

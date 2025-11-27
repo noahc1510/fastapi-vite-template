@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int = 5432
     POSTGRES_DB: str = "testdb"
     POSTGRES_USER: str = "postgres"
-    POSTGRES_PASSWORD: str
+    POSTGRES_PASSWORD: str = ""
     POSTGRES_POOL_SIZE: int = 5
     POSTGRES_MAX_OVERFLOW: int = 10
     POSTGRES_TIMEZONE: str = "UTC"
@@ -33,9 +33,19 @@ class Settings(BaseSettings):
     )
     LOGTO_CLIENT_ID: str = ""
     LOGTO_CLIENT_SECRET: str = ""
+    LOGTO_MANAGEMENT_API_BASE: str = ""
+    LOGTO_MANAGEMENT_API_TOKEN: str = ""
 
     VITE_LOGTO_ENDPOINT: str = ""
     VITE_LOGTO_APP_ID: str = ""
+
+    PAT_TOKEN_PREFIX: str = "pat"
+    PAT_TOKEN_SIZE: int = 48
+
+    GATEWAY_JWT_SECRET: str = "change-me"
+    GATEWAY_JWT_EXPIRES_SECONDS: int = 3600
+    GATEWAY_JWT_ISSUER: str = "remote-access-gateway"
+    TARGET_SERVICE_BASE_URL: str = ""
 
     @computed_field
     @property
