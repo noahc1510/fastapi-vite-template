@@ -35,7 +35,13 @@ fi
 
 # Convert project name to different formats
 PROJECT_NAME_SNAKE=$(echo "$PROJECT_NAME" | tr '-' '_')  # my_awesome_app
-PROJECT_NAME_TITLE=$(echo "$PROJECT_NAME" | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')  # My Awesome App
+
+# Build Title Case using POSIX tools (works on BSD/GNU)
+PROJECT_NAME_TITLE=$(
+  echo "$PROJECT_NAME" \
+  | tr '_-' '  ' \
+  | awk '{for(i=1;i<=NF;i++){$i=toupper(substr($i,1,1)) substr($i,2)}; print}'
+)
 
 echo ""
 echo -e "${BLUE}Project Configuration:${NC}"
