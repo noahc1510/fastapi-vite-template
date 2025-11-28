@@ -40,15 +40,12 @@ class Settings(BaseSettings):
     VITE_LOGTO_ENDPOINT: str = ""
     VITE_LOGTO_APP_ID: str = ""
 
-    PAT_TOKEN_PREFIX: str = "lap"
-    PAT_TOKEN_SIZE: int = 48
-
-    GATEWAY_JWT_SECRET: str = "change-me"
     GATEWAY_JWT_EXPIRES_SECONDS: int = 3600
-    GATEWAY_JWT_ISSUER: str = "remote-access-gateway"
     TARGET_SERVICE_BASE_URL: str = ""
 
     BASE_URL:str = "http://localhost:8000"
+
+    AIOS_API_ENDPOINT: str
     @computed_field
     @property
     def sqlalchemy_database_uri(self) -> str:

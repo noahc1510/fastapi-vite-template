@@ -6,6 +6,11 @@ from .pat import (
     PATExchangeResponse,
     PATResponse,
 )
+from .aios_token_exchange import (
+    AIOSTokenExchangeRequest,
+    AIOSTokenExchangeResponse,
+    AIOSTokenExchangeData,
+)
 
 
 __all__ = [
@@ -16,4 +21,7 @@ __all__ = [
     "PATExchangeRequest",
     "PATExchangeResponse",
     "PATResponse",
+    "AIOSTokenExchangeRequest",
+    "AIOSTokenExchangeResponse",
+    "AIOSTokenExchangeData",
 ]
