@@ -4,6 +4,7 @@ import base64
 import time
 from datetime import datetime
 from typing import Any
+from urllib.parse import quote
 
 import httpx
 from fastapi import HTTPException, status
@@ -77,8 +78,6 @@ async def logto_pat_list(claims, access_token) -> list[dict[str, Any]]:
 async def logto_pat_create(
     *,
     name: str,
-    description: str | None,
-    scopes: list[str],
     expires_at: datetime | None,
     resource: str | None,
     user_id: str | int,
@@ -87,11 +86,7 @@ async def logto_pat_create(
         config.LOGTO_ENDPOINT.rstrip("/")
         + f"/api/users/{user_id}/personal-access-tokens"
     )
-    payload: dict[str, Any] = {
-        "name": name,
-        "description": description,
-        "scopes": scopes,
-    }
+    payload: dict[str, Any] = {"name": name}
     if resource:
         payload["resource"] = resource
     if expires_at:
@@ -107,10 +102,11 @@ async def logto_pat_create(
     return resp.json()
 
 
-async def logto_pat_delete(pat_id: str | int, user_id: str, access_token: str) -> None:
+async def logto_pat_delete(pat_name: str, user_id: str) -> None:
+    encoded_name = quote(str(pat_name), safe="")
     endpoint = (
         config.LOGTO_ENDPOINT.rstrip("/")
-        + f"/api/users/{user_id}/personal-access-tokens/{pat_id}"
+        + f"/api/users/{user_id}/personal-access-tokens/{encoded_name}"
     )
     async with httpx.AsyncClient(timeout=10) as client:
         resp = await client.delete(endpoint, headers=await _auth_header())

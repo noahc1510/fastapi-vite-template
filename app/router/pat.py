@@ -53,13 +53,11 @@ async def list_my_pats(auth: tuple[dict, str] = Depends(ensure_logto_user)):
     pats = await logto_pat_list(claims, access_token)
     return [
         PATResponse(
-            id=str(pat.get("id") or pat.get("patId")),
+            id=str(pat.get("name") or pat.get("id") or pat.get("patId") or ""),
             name=pat.get("name", ""),
             description=pat.get("description"),
-            scopes=pat.get("scopes") or [],
             expires_at=pat.get("expiresAt"),
-            last_used_at=pat.get("lastUsedAt"),
-            logto_pat_id=str(pat.get("id") or pat.get("patId")),
+            logto_pat_id=str(pat.get("id") or pat.get("patId") or pat.get("name") or ""),
             is_revoked=pat.get("isRevoked", False),
             created_at=pat.get("createdAt"),
         )
@@ -76,34 +74,30 @@ async def create_my_pat(
     resource = config.TARGET_SERVICE_BASE_URL or None
     created = await logto_pat_create(
         name=payload.name,
-        description=payload.description,
-        scopes=payload.scopes,
         expires_at=payload.expires_at,
         resource=resource,
         user_id=claims.get("sub"),
     )
     token_value = created.get("value")
     return PATCreateResponse(
-        id=str(created.get("id") or created.get("patId")),
+        id=str(created.get("name") or created.get("id") or created.get("patId") or payload.name),
         name=created.get("name", payload.name),
         description=created.get("description"),
-        scopes=created.get("scopes") or payload.scopes,
         expires_at=created.get("expiresAt") or payload.expires_at,
-        last_used_at=created.get("lastUsedAt"),
-        logto_pat_id=str(created.get("id") or created.get("patId")),
+        logto_pat_id=str(created.get("id") or created.get("patId") or created.get("name") or payload.name),
         is_revoked=created.get("isRevoked", False),
         created_at=created.get("createdAt") or datetime.now(timezone.utc),
         token=token_value,
     )
 
 
-@router.delete("/{pat_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{pat_name}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_pat(
-        pat_id: str,
-        auth: tuple[dict, str] = Depends(ensure_logto_user),
-        # access_token: str = Depends(get_access_token)
-    ):
-    claims, token = auth
+    pat_name: str,
+    auth: tuple[dict, str] = Depends(ensure_logto_user),
+    # access_token: str = Depends(get_access_token)
+):
+    claims, _token = auth
     user_id = claims.get("sub")
     if not user_id:
         raise HTTPException(
@@ -111,7 +105,7 @@ async def delete_pat(
             detail="无法从令牌中获取用户信息",
         )
 
-    await logto_pat_delete(pat_id, user_id=user_id, access_token = token)
+    await logto_pat_delete(pat_name, user_id=user_id)
     return None
 
 

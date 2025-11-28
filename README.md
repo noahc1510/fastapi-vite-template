@@ -12,8 +12,8 @@
 主要接口：
 
 - `GET /api/pat`：需要 Logto access_token，返回 Logto PAT 列表（由管理端 token 获取）。
-- `POST /api/pat`：需要 Logto access_token，调用 Logto 管理端创建 PAT，响应包含 PAT 明文。
-- `DELETE /api/pat/{id}`：撤销/删除 PAT（通过管理端）。
+- `POST /api/pat`：需要 Logto access_token，调用 Logto 管理端创建 PAT（仅需 name 与可选 expires_at），响应包含 PAT 明文。
+- `DELETE /api/pat/{name}`：撤销/删除 PAT（通过管理端）。
 - `POST /api/pat/exchange`：`Authorization: Bearer <PAT>` 或 `X-PAT-TOKEN`，后端调用 Logto token 端点返回 access_token（JWT）。
 - `GET /api/gateway/ping`：携带 Logto access_token 验证。
 - `ANY /api/gateway/target/{path}`：携带 Logto access_token，转发到 `TARGET_SERVICE_BASE_URL`。

@@ -10,15 +10,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./com
 import { Input } from "./components/ui/input"
 import { Label } from "./components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./components/ui/table"
-import { Textarea } from "./components/ui/textarea"
 
 type Pat = {
-  id: number
+  id: string
   name: string
   description?: string | null
-  scopes: string[]
   expires_at?: string | null
-  last_used_at?: string | null
   logto_pat_id?: string | null
   is_revoked: boolean
   created_at: string
@@ -28,7 +25,7 @@ type Pat = {
 type ExchangeResult = {
   access_token: string
   expires_in: number
-  pat_id: number
+  pat_id: string
 }
 
 const apiFetch = async <T,>(url: string, options: RequestInit = {}) => {
@@ -56,7 +53,7 @@ function App() {
   const [profile, setProfile] = useState<Record<string, unknown> | null>(null)
 
   const [pats, setPats] = useState<Pat[]>([])
-  const [patForm, setPatForm] = useState({ name: "", description: "", scopes: "gateway", expires_at: "" })
+  const [patForm, setPatForm] = useState({ name: "", expires_at: "" })
   const [creatingPat, setCreatingPat] = useState(false)
   const [loadingPats, setLoadingPats] = useState(false)
   const [patError, setPatError] = useState<string | null>(null)
@@ -129,8 +126,6 @@ function App() {
     try {
       const payload = {
         name: patForm.name,
-        description: patForm.description || null,
-        scopes: patForm.scopes.split(",").map((scope) => scope.trim()),
         expires_at: patForm.expires_at ? new Date(patForm.expires_at).toISOString() : null,
       }
       const created = await apiFetch<Pat>("/api/pat", {
@@ -150,15 +145,15 @@ function App() {
     }
   }
 
-  const handleDelete = async (patId: number) => {
+  const handleDelete = async (patName: string) => {
     if (!logtoAccessToken) return
     setPatError(null)
     try {
-      await apiFetch(`/api/pat/${patId}`, {
+      await apiFetch(`/api/pat/${encodeURIComponent(patName)}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${logtoAccessToken}` },
       })
-      setPats((prev) => prev.filter((p) => p.id !== patId))
+      setPats((prev) => prev.filter((p) => p.name !== patName))
     } catch (err) {
       setPatError((err as Error).message)
     }
@@ -271,22 +266,6 @@ function App() {
             />
           </div>
           <div className="space-y-2">
-            <Label>作用域（逗号分隔）</Label>
-            <Input
-              placeholder="gateway,read-only"
-              value={patForm.scopes}
-              onChange={(e) => setPatForm((s) => ({ ...s, scopes: e.target.value }))}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>描述</Label>
-            <Textarea
-              placeholder="用途说明，方便后续管理"
-              value={patForm.description}
-              onChange={(e) => setPatForm((s) => ({ ...s, description: e.target.value }))}
-            />
-          </div>
-          <div className="space-y-2">
             <Label>到期时间（可选）</Label>
             <Input
               type="datetime-local"
@@ -317,23 +296,21 @@ function App() {
             <TableHeader>
               <TableRow>
                 <TableHead>名称</TableHead>
-                <TableHead>作用域</TableHead>
                 <TableHead>到期</TableHead>
-                <TableHead>最近使用</TableHead>
                 <TableHead className="text-right">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loadingPats && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-slate-500">
+                  <TableCell colSpan={3} className="text-center text-slate-500">
                     加载中...
                   </TableCell>
                 </TableRow>
               )}
               {!loadingPats && pats.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-slate-500">
+                  <TableCell colSpan={3} className="text-center text-slate-500">
                     暂无 PAT
                   </TableCell>
                 </TableRow>
@@ -344,21 +321,13 @@ function App() {
                     <div>{pat.name}</div>
                     {pat.description && <div className="text-xs text-slate-500">{pat.description}</div>}
                   </TableCell>
-                  <TableCell className="space-x-1">
-                    {pat.scopes.map((scope) => (
-                      <Badge key={scope} variant="muted">
-                        {scope}
-                      </Badge>
-                    ))}
-                  </TableCell>
                   <TableCell>{formatDate(pat.expires_at)}</TableCell>
-                  <TableCell>{pat.last_used_at ? formatDate(pat.last_used_at) : "-"}</TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
                       size="sm"
                       className="text-rose-600 hover:bg-rose-50"
-                      onClick={() => handleDelete(pat.id)}
+                      onClick={() => handleDelete(pat.name)}
                     >
                       删除
                     </Button>
