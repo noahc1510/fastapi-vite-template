@@ -31,15 +31,16 @@ class Settings(BaseSettings):
     LOGTO_INTROSPECTION_ENDPOINT: str = (
         "https://example.com/oidc/token/introspection"
     )
+    LOGTO_ENDPOINT: str = ""
+    LOGTO_OIDC_TOKEN_ENDPOINT: str = ""
     LOGTO_CLIENT_ID: str = ""
     LOGTO_CLIENT_SECRET: str = ""
-    LOGTO_MANAGEMENT_API_BASE: str = ""
-    LOGTO_MANAGEMENT_API_TOKEN: str = ""
+    LOGTO_JWKS_ENDPOINT: str = ""
 
     VITE_LOGTO_ENDPOINT: str = ""
     VITE_LOGTO_APP_ID: str = ""
 
-    PAT_TOKEN_PREFIX: str = "pat"
+    PAT_TOKEN_PREFIX: str = "lap"
     PAT_TOKEN_SIZE: int = 48
 
     GATEWAY_JWT_SECRET: str = "change-me"
@@ -47,6 +48,7 @@ class Settings(BaseSettings):
     GATEWAY_JWT_ISSUER: str = "remote-access-gateway"
     TARGET_SERVICE_BASE_URL: str = ""
 
+    BASE_URL:str = "http://localhost:8000"
     @computed_field
     @property
     def sqlalchemy_database_uri(self) -> str:
@@ -55,4 +57,13 @@ class Settings(BaseSettings):
             f"postgresql+psycopg://{self.POSTGRES_USER}:{password}"
             f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
         )
+
+    @computed_field
+    @property
+    def LOGTO_TOKEN_ENDPOINT(self) -> str:
+        if self.LOGTO_OIDC_TOKEN_ENDPOINT:
+            return self.LOGTO_OIDC_TOKEN_ENDPOINT
+        if self.LOGTO_ENDPOINT:
+            return self.LOGTO_ENDPOINT.rstrip("/") + "/oidc/token"
+        return "https://example.com/oidc/token"
 config = Settings()

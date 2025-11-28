@@ -15,15 +15,15 @@ class PATCreateRequest(BaseModel):
 class PATResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
+    id: str
     name: str
     description: str | None
     scopes: list[str]
-    expires_at: datetime | None
-    last_used_at: datetime | None
+    expires_at: datetime | str | None
+    last_used_at: datetime | str | None
     logto_pat_id: str | None
     is_revoked: bool
-    created_at: datetime
+    created_at: datetime | str
 
 
 class PATCreateResponse(PATResponse):
@@ -35,10 +35,13 @@ class PATExchangeResponse(BaseModel):
     token_type: str = "bearer"
     expires_in: int
     issued_at: int
-    pat_id: int
+    pat_id: str
 
 
 class PATExchangeRequest(BaseModel):
     token: str | None = Field(
         default=None, description="待兑换的 PAT。为空时可从 Authorization 或 X-PAT-TOKEN 头读取"
+    )
+    resource: str | None = Field(
+        default=None, description="目标 resource/audience，不填则使用后端配置的 TARGET_SERVICE_BASE_URL"
     )

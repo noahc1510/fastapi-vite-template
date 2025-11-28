@@ -44,6 +44,14 @@ const apiFetch = async <T,>(url: string, options: RequestInit = {}) => {
 function App() {
   const { isAuthenticated, isLoading, signIn, signOut, fetchUserInfo, getAccessToken } = useLogto()
   const location = useLocation()
+  const primaryResource = useMemo(() => {
+    const raw = import.meta.env.VITE_LOGTO_RESOURCE
+    if (!raw) return undefined
+    return raw
+      .split(",")
+      .map((item: string) => item.trim())
+      .filter(Boolean)?.[0]
+  }, [])
   const [logtoAccessToken, setLogtoAccessToken] = useState<string | null>(null)
   const [profile, setProfile] = useState<Record<string, unknown> | null>(null)
 
@@ -75,7 +83,7 @@ function App() {
         return
       }
       try {
-        const [user, token] = await Promise.all([fetchUserInfo(), getAccessToken()])
+        const [user, token] = await Promise.all([fetchUserInfo(), getAccessToken(primaryResource)])
         setProfile(user ?? null)
         setLogtoAccessToken(token ?? null)
       } catch (err) {
@@ -85,7 +93,7 @@ function App() {
       }
     }
     void bootstrap()
-  }, [isAuthenticated, fetchUserInfo, getAccessToken])
+  }, [isAuthenticated, fetchUserInfo, getAccessToken, primaryResource])
 
   useEffect(() => {
     const loadPats = async () => {

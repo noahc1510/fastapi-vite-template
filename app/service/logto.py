@@ -5,48 +5,53 @@ from typing import Any
 
 import httpx
 from fastapi import HTTPException, status
+from jwt import InvalidTokenError, PyJWKClient, decode
 from loguru import logger
 
 from app.config import config
 
+_jwks_client: PyJWKClient | None = None
+
+
+def _get_jwks_client() -> PyJWKClient:
+    global _jwks_client
+    if _jwks_client is None:
+        if not (config.LOGTO_JWKS_ENDPOINT or config.LOGTO_ENDPOINT):
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="未配置 Logto JWKS 地址",
+            )
+        jwks_url = config.LOGTO_JWKS_ENDPOINT or (
+            config.LOGTO_ENDPOINT.rstrip("/") + "/oidc/jwks"
+        )
+        _jwks_client = PyJWKClient(jwks_url)
+    return _jwks_client
+
 
 async def introspect_access_token(token: str) -> dict[str, Any]:
     """
-    Validate a Logto access token via the introspection endpoint.
+    Validate a Logto access token locally via JWKS (JWT verification).
     """
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="缺少访问令牌"
         )
 
-    payload = {
-        "token": token,
-        "client_id": config.LOGTO_CLIENT_ID,
-        "client_secret": config.LOGTO_CLIENT_SECRET,
-    }
     try:
-        async with httpx.AsyncClient(timeout=10) as client:
-            response = await client.post(config.LOGTO_INTROSPECTION_ENDPOINT, data=payload)
-    except httpx.HTTPError as exc:
-        logger.exception("Logto introspection failed")
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Logto introspection error: {exc}",
-        ) from exc
-
-    if response.status_code >= 400:
-        logger.error("Logto introspection error %s: %s", response.status_code, response.text)
+        signing_key = _get_jwks_client().get_signing_key_from_jwt(token)
+        decode_kwargs: dict[str, Any] = {"algorithms": ["RS256", "HS256", "ES384"]}
+        if config.LOGTO_CLIENT_ID:
+            decode_kwargs["audience"] = config.BASE_URL
+        if config.LOGTO_ENDPOINT:
+            decode_kwargs["issuer"] = config.LOGTO_ENDPOINT.rstrip("/") + '/oidc'
+        claims = decode(token, signing_key.key, **decode_kwargs)
+    except InvalidTokenError as exc:
+        logger.error("Logto JWT 验证失败: %s", exc)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="无法校验访问令牌",
-        )
-
-    data = response.json()
-    if not data.get("active"):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="访问令牌已失效"
-        )
-    return data
+            detail="访问令牌无效或已过期",
+        ) from exc
+    return claims
 
 
 async def create_logto_pat_via_api(

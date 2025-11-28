@@ -3,7 +3,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.config import config
 from app.service.gateway import forward_request
-from app.service.pat import decode_gateway_token
+from app.service.logto import introspect_access_token
 
 router = APIRouter(prefix="/gateway", tags=["gateway"])
 
@@ -17,12 +17,12 @@ async def require_gateway_token(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="缺少 access_token"
         )
-    return decode_gateway_token(credentials.credentials)
+    return await introspect_access_token(credentials.credentials)
 
 
 @router.get("/ping")
 async def gateway_ping(claims=Depends(require_gateway_token)):
-    return {"status": "ok", "pat_id": claims.get("pat_id"), "sub": claims.get("sub")}
+    return {"status": "ok", "sub": claims.get("sub"), "exp": claims.get("exp")}
 
 
 @router.api_route(
