@@ -102,7 +102,7 @@ async def kickoff_aios_chat(
     }
 
     try:
-        timeout = httpx.Timeout(connect=10.0, write=10.0, read=5.0)
+        timeout = httpx.Timeout(connect=10.0, write=10.0, read=5.0, pool=5.0)
         async with httpx.AsyncClient(timeout=timeout) as client:
             async with client.stream("POST", url, json=payload, headers=headers) as resp:
                 if resp.status_code >= 400:
