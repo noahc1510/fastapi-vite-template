@@ -11,6 +11,10 @@ from .aios_token_exchange import (
     AIOSTokenExchangeResponse,
     AIOSTokenExchangeData,
 )
+from .aios_task import (
+    AIOSTaskBootstrapRequest,
+    AIOSTaskBootstrapResponse,
+)
 
 
 __all__ = [
@@ -24,4 +28,6 @@ __all__ = [
     "AIOSTokenExchangeRequest",
     "AIOSTokenExchangeResponse",
     "AIOSTokenExchangeData",
+    "AIOSTaskBootstrapRequest",
+    "AIOSTaskBootstrapResponse",
 ]
